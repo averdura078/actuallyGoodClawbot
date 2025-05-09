@@ -1,20 +1,11 @@
-/*----------------------------------------------------------------------------*/
-/*                                                                            */
-/*    Module:       main.cpp                                                  */
-/*    Author:       VEX                                                       */
-/*    Created:      Wed Sep 25 2019                                           */
-/*    Description:  Tank Drive                                                */
-/*    This sample allows you to control the V5 Clawbot using the both         */
-/*    joystick. Adjust the deadband value for more accurate movements.        */
-/*----------------------------------------------------------------------------*/
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
 // Controller1          controller
-// LeftMotor            motor         1
-// RightMotor           motor         10
-// ClawMotor            motor         3
-// ArmMotor             motor         8
+// LeftMotor            motor         13, 19
+// RightMotor           motor         9, 10
+// ClawMotor            motor         x
+// ArmMotor             motor         x
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
@@ -32,25 +23,31 @@ int main()
     int deadband = 5;
     while (true)
     {
-        // tankDrive();
+        //tankDrive();
         splitArcade();
     }
 }
 
-int splitArcade(){
-    int x = Controller1.Axis4.position();
-    int y = Controller1.Axis2.position();
+int splitArcade()
+{
+    int turnSpeed = Controller1.Axis4.position();
+    int velocity = Controller1.Axis2.position();
 
-    LeftDriveSmart.setVelocity(y+x, percent);
-    RightDriveSmart.setVelocity(y-x, percent);
+    Brain.Screen.printAt(1, 30, "%d", velocity);
+    Brain.Screen.printAt(1, 50, "%d", turnSpeed);
+    wait(25, msec);
 
-    RightDriveSmart.spin(forward);
+    LeftDriveSmart.setVelocity(velocity - turnSpeed, percent);
+    RightDriveSmart.setVelocity(velocity + turnSpeed, percent);
+
     LeftDriveSmart.spin(forward);
+    RightDriveSmart.spin(forward);
 
     return 0;
 }
 
-int tankDrive(){
+int tankDrive()
+{
     int deadband = 5;
 
     // Get the velocity percentage of the left motor. (Axis3)
@@ -87,5 +84,4 @@ int tankDrive(){
     wait(25, msec);
 
     return 0;
-
 }
