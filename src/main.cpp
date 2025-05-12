@@ -10,6 +10,8 @@
 
 #include "vex.h"
 #include "robotconfig.h"
+#include <stdio.h>
+#include <math.h>
 using namespace vex;
 
 int tankDrive();
@@ -36,9 +38,18 @@ int splitArcade()
     Brain.Screen.printAt(1, 30, "%d", velocity);
     Brain.Screen.printAt(1, 50, "%d", turnSpeed);
     wait(25, msec);
+    Brain.Screen.clearScreen();
 
-    LeftDriveSmart.setVelocity(velocity - turnSpeed, percent);
-    RightDriveSmart.setVelocity(velocity + turnSpeed, percent);
+    int rightValue = (0.00009 * (velocity - turnSpeed) * (velocity - turnSpeed) * (velocity - turnSpeed));
+    int leftValue = (0.00009 * (velocity + turnSpeed) * (velocity + turnSpeed) * (velocity + turnSpeed));
+   
+    Brain.Screen.printAt(1, 90, "%d", rightValue);
+    Brain.Screen.printAt(1, 110, "%d", leftValue);
+    wait(25, msec);
+    Brain.Screen.clearScreen();
+
+    LeftDriveSmart.setVelocity(rightValue, percent);
+    RightDriveSmart.setVelocity(leftValue, percent);
 
     LeftDriveSmart.spin(forward);
     RightDriveSmart.spin(forward);
