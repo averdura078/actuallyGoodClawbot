@@ -15,7 +15,9 @@
 using namespace vex;
 
 int tankDrive();
-int splitArcade();
+int splitArcadeWithFunction();
+int splitArcadeBasic();
+
 
 int main()
 {
@@ -26,14 +28,15 @@ int main()
     while (true)
     {
         //tankDrive();
-        splitArcade();
+        //splitArcadeWithFunction();
+        splitArcadeBasic();
     }
 }
 
-int splitArcade()
+int splitArcadeWithFunction()
 {
-    int turnSpeed = Controller1.Axis4.position();
-    int velocity = Controller1.Axis2.position();
+    int turnSpeed = Controller1.Axis1.position();
+    int velocity = Controller1.Axis3.position();
 
     Brain.Screen.printAt(1, 30, "%d", velocity);
     Brain.Screen.printAt(1, 50, "%d", turnSpeed);
@@ -42,6 +45,33 @@ int splitArcade()
 
     int rightValue = (0.00009 * (velocity - turnSpeed) * (velocity - turnSpeed) * (velocity - turnSpeed));
     int leftValue = (0.00009 * (velocity + turnSpeed) * (velocity + turnSpeed) * (velocity + turnSpeed));
+   
+    Brain.Screen.printAt(1, 90, "%d", rightValue);
+    Brain.Screen.printAt(1, 110, "%d", leftValue);
+    wait(25, msec);
+    Brain.Screen.clearScreen();
+
+    LeftDriveSmart.setVelocity(rightValue, percent);
+    RightDriveSmart.setVelocity(leftValue, percent);
+
+    LeftDriveSmart.spin(forward);
+    RightDriveSmart.spin(forward);
+
+    return 0;
+}
+
+int splitArcadeBasic()
+{
+    int turnSpeed = Controller1.Axis1.position();
+    int velocity = Controller1.Axis3.position();
+
+    Brain.Screen.printAt(1, 30, "%d", velocity);
+    Brain.Screen.printAt(1, 50, "%d", turnSpeed);
+    wait(25, msec);
+    Brain.Screen.clearScreen();
+
+    int rightValue = velocity - turnSpeed;
+    int leftValue = velocity + turnSpeed;
    
     Brain.Screen.printAt(1, 90, "%d", rightValue);
     Brain.Screen.printAt(1, 110, "%d", leftValue);
