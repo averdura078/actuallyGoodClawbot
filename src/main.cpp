@@ -2,10 +2,10 @@
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
 // Controller1          controller
-// LeftMotor            motor         13, 19
-// RightMotor           motor         9, 10
-// ClawMotor            motor         x
-// ArmMotor             motor         x
+// left motors          motor         13, 19
+// right motors         motor         9, 10
+// clawMotor            motor         x
+// chainMotor           motor         x
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
@@ -17,7 +17,7 @@ using namespace vex;
 int tankDrive();
 int splitArcadeWithFunction();
 int splitArcadeBasic();
-
+int clawControl();
 
 int main()
 {
@@ -27,10 +27,41 @@ int main()
     int deadband = 5;
     while (true)
     {
-        //tankDrive();
-        //splitArcadeWithFunction();
+        // tankDrive();
+        // splitArcadeWithFunction();
         splitArcadeBasic();
+        clawControl();
     }
+}
+
+int clawControl()
+{
+    chainMotor.setStopping(hold); //prevent claw from falling down due to gravity
+
+    clawMotor.setStopping(hold); //to hold objects
+    clawMotor.setMaxTorque(30, percent); //don't burn out motor
+    clawMotor.setTimeout(2, seconds);
+    //clawMotor.spinToPosition(-90, degrees);
+
+    if (Controller1.ButtonUp.PRESSED)
+    {
+        chainMotor.spin(forward);
+    }
+    else if (Controller1.ButtonDown.PRESSED)
+    {
+        chainMotor.spin(reverse);
+    }
+
+    if (Controller1.ButtonA.PRESSED)
+    {
+        clawMotor.spin(forward);
+    }
+    else if (Controller1.ButtonB.PRESSED)
+    {
+        clawMotor.spin(reverse);
+    }
+
+    return 0;
 }
 
 int splitArcadeWithFunction()
@@ -45,7 +76,7 @@ int splitArcadeWithFunction()
 
     int rightValue = (0.00009 * (velocity - turnSpeed) * (velocity - turnSpeed) * (velocity - turnSpeed));
     int leftValue = (0.00009 * (velocity + turnSpeed) * (velocity + turnSpeed) * (velocity + turnSpeed));
-   
+
     Brain.Screen.printAt(1, 90, "%d", rightValue);
     Brain.Screen.printAt(1, 110, "%d", leftValue);
     wait(25, msec);
@@ -72,7 +103,7 @@ int splitArcadeBasic()
 
     int rightValue = velocity - turnSpeed;
     int leftValue = velocity + turnSpeed;
-   
+
     Brain.Screen.printAt(1, 90, "%d", rightValue);
     Brain.Screen.printAt(1, 110, "%d", leftValue);
     wait(25, msec);

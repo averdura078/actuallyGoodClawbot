@@ -21,8 +21,10 @@ motor_group RightDriveSmart = motor_group(rightMotorA, rightMotorB);
 drivetrain Drivetrain = drivetrain(LeftDriveSmart, RightDriveSmart, 319.19, 295, 165, mm, 1); 
 
 // VEXcode generated functions 
-//motor ClawMotor = motor(PORT3, ratio18_1, false); 
-//motor ArmMotor = motor(PORT8, ratio18_1, false); 
+motor clawMotor = motor(PORT3, ratio18_1, false); //fix ports. ratio can either be 36:1, 18:1, or 6:1 (higher = more torque)
+motor chainMotor = motor(PORT8, ratio18_1, false); 
+
+
 // VEXcode generated functions 
 /** 
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro. 
