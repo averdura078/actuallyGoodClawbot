@@ -36,29 +36,36 @@ int main()
 
 int clawControl()
 {
-    chainMotor.setStopping(hold); //prevent claw from falling down due to gravity
+    chainMotor.setStopping(brake); // prevent claw from falling down due to gravity
 
-    clawMotor.setStopping(hold); //to hold objects
-    clawMotor.setMaxTorque(30, percent); //don't burn out motor
-    clawMotor.setTimeout(2, seconds);
-    //clawMotor.spinToPosition(-90, degrees);
+    clawMotor.setStopping(hold); // to hold objects
+     clawMotor.setMaxTorque(30, percent); //don't burn out motor
+     clawMotor.setTimeout(2, seconds);
+     
 
-    if (Controller1.ButtonUp.PRESSED)
+    if (Controller1.ButtonUp.pressing())
     {
-        chainMotor.spin(forward);
+        chainMotor.spin(reverse, 50, percent); // move up at 50% speed
     }
-    else if (Controller1.ButtonDown.PRESSED)
+    else if (Controller1.ButtonDown.pressing())
     {
-        chainMotor.spin(reverse);
+        chainMotor.spin(forward, 50, percent); //move down at 50% speed
+    }
+    else
+    {
+        chainMotor.stop(); // stop the motor if the button is not pressed
     }
 
-    if (Controller1.ButtonA.PRESSED)
+    if (Controller1.ButtonA.pressing())
     {
-        clawMotor.spin(forward);
+        clawMotor.spin(reverse, 50, percent);
     }
-    else if (Controller1.ButtonB.PRESSED)
+    else if (Controller1.ButtonB.pressing())
     {
-        clawMotor.spin(reverse);
+        clawMotor.spin(forward, 50, percent);
+    }
+    else {
+        clawMotor.stop();
     }
 
     return 0;
