@@ -28,7 +28,7 @@ int main()
     while (true)
     {
         // tankDrive();
-        // splitArcadeWithFunction();
+         //splitArcadeWithFunction();
         splitArcadeBasic();
         clawControl();
     }
@@ -39,15 +39,14 @@ int clawControl()
     chainMotor.setStopping(brake); // prevent claw from falling down due to gravity
 
     clawMotor.setStopping(hold); // to hold objects
-     clawMotor.setMaxTorque(30, percent); //don't burn out motor
-     clawMotor.setTimeout(2, seconds);
+    clawMotor.setMaxTorque(35, percent); //don't burn out motor
+    clawMotor.setTimeout(2, seconds);
      
-
-    if (Controller1.ButtonUp.pressing())
+    if (Controller1.ButtonL1.pressing())
     {
         chainMotor.spin(reverse, 50, percent); // move up at 50% speed
     }
-    else if (Controller1.ButtonDown.pressing())
+    else if (Controller1.ButtonL2.pressing())
     {
         chainMotor.spin(forward, 50, percent); //move down at 50% speed
     }
@@ -56,11 +55,11 @@ int clawControl()
         chainMotor.stop(); // stop the motor if the button is not pressed
     }
 
-    if (Controller1.ButtonA.pressing())
+    if (Controller1.ButtonR1.pressing())
     {
         clawMotor.spin(reverse, 50, percent);
     }
-    else if (Controller1.ButtonB.pressing())
+    else if (Controller1.ButtonR2.pressing())
     {
         clawMotor.spin(forward, 50, percent);
     }
@@ -81,8 +80,8 @@ int splitArcadeWithFunction()
     wait(25, msec);
     Brain.Screen.clearScreen();
 
-    int rightValue = (0.00009 * (velocity - turnSpeed) * (velocity - turnSpeed) * (velocity - turnSpeed));
-    int leftValue = (0.00009 * (velocity + turnSpeed) * (velocity + turnSpeed) * (velocity + turnSpeed));
+    int rightValue = (0.00009 * (velocity - turnSpeed) * (velocity - turnSpeed) * (velocity + turnSpeed));
+    int leftValue = (0.00009 * (velocity + turnSpeed) * (velocity + turnSpeed) * (velocity - turnSpeed));
 
     Brain.Screen.printAt(1, 90, "%d", rightValue);
     Brain.Screen.printAt(1, 110, "%d", leftValue);
@@ -92,8 +91,8 @@ int splitArcadeWithFunction()
     LeftDriveSmart.setVelocity(rightValue, percent);
     RightDriveSmart.setVelocity(leftValue, percent);
 
-    LeftDriveSmart.spin(forward);
-    RightDriveSmart.spin(forward);
+    LeftDriveSmart.spin(reverse);
+    RightDriveSmart.spin(reverse);
 
     return 0;
 }
@@ -108,19 +107,19 @@ int splitArcadeBasic()
     wait(25, msec);
     Brain.Screen.clearScreen();
 
-    int rightValue = velocity - turnSpeed;
-    int leftValue = velocity + turnSpeed;
+    int rightValue = (velocity - turnSpeed)/1.5;
+    int leftValue = (velocity + turnSpeed)/1.5;
 
     Brain.Screen.printAt(1, 90, "%d", rightValue);
     Brain.Screen.printAt(1, 110, "%d", leftValue);
     wait(25, msec);
     Brain.Screen.clearScreen();
 
-    LeftDriveSmart.setVelocity(rightValue, percent);
-    RightDriveSmart.setVelocity(leftValue, percent);
+    LeftDriveSmart.setVelocity(leftValue, percent);
+    RightDriveSmart.setVelocity(rightValue, percent);
 
-    LeftDriveSmart.spin(forward);
-    RightDriveSmart.spin(forward);
+    LeftDriveSmart.spin(reverse);
+    RightDriveSmart.spin(reverse);
 
     return 0;
 }
