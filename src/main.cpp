@@ -55,11 +55,11 @@ int clawControl()
         chainMotor.stop(); // stop the motor if the button is not pressed
     }
 
-    if (Controller1.ButtonR1.pressing())
+    if (Controller1.ButtonR2.pressing())
     {
         clawMotor.spin(reverse, 50, percent);
     }
-    else if (Controller1.ButtonR2.pressing())
+    else if (Controller1.ButtonR1.pressing())
     {
         clawMotor.spin(forward, 50, percent);
     }
