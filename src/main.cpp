@@ -99,7 +99,7 @@ int splitArcadeWithFunction()
 
 int splitArcadeBasic()
 {
-    int turnSpeed = Controller1.Axis1.position();
+    int turnSpeed = (Controller1.Axis1.position())/1.5;
     int velocity = Controller1.Axis3.position();
 
     Brain.Screen.printAt(1, 30, "%d", velocity);
