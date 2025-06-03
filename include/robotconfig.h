@@ -18,19 +18,14 @@ motor rightMotorA = motor(PORT19, ratio18_1, true);
 motor rightMotorB = motor(PORT13, ratio18_1, true);  
 motor_group RightDriveSmart = motor_group(rightMotorA, rightMotorB); 
 
-drivetrain Drivetrain = drivetrain(LeftDriveSmart, RightDriveSmart, 319.19, 295, 165, mm, 1); 
-
-// VEXcode generated functions 
-motor clawMotor = motor(PORT4, ratio18_1, false); //fix ports. ratio can either be 36:1, 18:1, or 6:1 (higher = more torque)
+motor clawMotor = motor(PORT4, ratio18_1, false); //ratio can either be 36:1, 18:1, or 6:1 (higher = more torque)
 motor chainMotor = motor(PORT8, ratio18_1, false); 
 
-
-// VEXcode generated functions 
-/** 
- * Used to initialize code/tasks/devices added using tools in VEXcode Pro. 
- * 
- * This should be called at the start of your int main function. 
- */ 
+//sensors
+rotation rotationSensor = rotation(PORT6, true);
+distance ballDistanceSensor = distance(PORT15);
+distance wallDistanceSensor = distance(PORT20);
+inertial intertialSensor = inertial(PORT18);
 
 void vexcodeInit(void) { 
 

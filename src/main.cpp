@@ -18,6 +18,7 @@ int tankDrive();
 int splitArcadeWithFunction();
 int splitArcadeBasic();
 int clawControl();
+int auton();
 
 int main()
 {
@@ -25,30 +26,51 @@ int main()
     vexcodeInit();
     // Deadband stops the motors when Axis values are close to zero.
     int deadband = 5;
+
     while (true)
     {
-        // tankDrive();
-         //splitArcadeWithFunction();
-        splitArcadeBasic();
-        clawControl();
+        if (Controller1.ButtonX.pressing()) //run auton
+        {
+            Brain.Screen.printAt(1, 90, "pressed");
+
+          auton();
+        }
+        else //op control
+        {
+            // tankDrive();
+            // splitArcadeWithFunction();
+            splitArcadeBasic();
+
+            clawControl();
+        }
     }
+}
+
+int auton()
+{
+   Brain.Screen.printAt(90, 90, "in auton");
+   //Brain.Screen.clearScreen();
+
+   
+
+    return 0;
 }
 
 int clawControl()
 {
     chainMotor.setStopping(brake); // prevent claw from falling down due to gravity
 
-    clawMotor.setStopping(hold); // to hold objects
-    clawMotor.setMaxTorque(35, percent); //don't burn out motor
+    clawMotor.setStopping(hold);         // to hold objects
+    clawMotor.setMaxTorque(35, percent); // don't burn out motor
     clawMotor.setTimeout(2, seconds);
-     
+
     if (Controller1.ButtonL1.pressing())
     {
         chainMotor.spin(reverse, 50, percent); // move up at 50% speed
     }
     else if (Controller1.ButtonL2.pressing())
     {
-        chainMotor.spin(forward, 50, percent); //move down at 50% speed
+        chainMotor.spin(forward, 50, percent); // move down at 50% speed
     }
     else
     {
@@ -63,7 +85,8 @@ int clawControl()
     {
         clawMotor.spin(forward, 50, percent);
     }
-    else {
+    else
+    {
         clawMotor.stop();
     }
 
@@ -99,7 +122,7 @@ int splitArcadeWithFunction()
 
 int splitArcadeBasic()
 {
-    int turnSpeed = (Controller1.Axis1.position())/1.5;
+    int turnSpeed = (Controller1.Axis1.position()) / 1.5;
     int velocity = Controller1.Axis3.position();
 
     Brain.Screen.printAt(1, 30, "%d", velocity);
@@ -107,8 +130,8 @@ int splitArcadeBasic()
     wait(25, msec);
     Brain.Screen.clearScreen();
 
-    int rightValue = (velocity - turnSpeed)/1.5;
-    int leftValue = (velocity + turnSpeed)/1.5;
+    int rightValue = (velocity - turnSpeed) / 1.5;
+    int leftValue = (velocity + turnSpeed) / 1.5;
 
     Brain.Screen.printAt(1, 90, "%d", rightValue);
     Brain.Screen.printAt(1, 110, "%d", leftValue);
