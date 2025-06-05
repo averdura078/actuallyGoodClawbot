@@ -24,18 +24,16 @@ int main()
 {
     // Initializing Robot Configuration. DO NOT REMOVE!
     vexcodeInit();
-    // Deadband stops the motors when Axis values are close to zero.
-    int deadband = 5;
+    rotationSensor.resetPosition();
 
     while (true)
     {
-        if (Controller1.ButtonX.pressing()) //run auton
+        if (Controller1.ButtonX.pressing()) // run auton
         {
             Brain.Screen.printAt(1, 90, "pressed");
-
-          auton();
+            auton();
         }
-        else //op control
+        else // op control
         {
             // tankDrive();
             // splitArcadeWithFunction();
@@ -48,10 +46,35 @@ int main()
 
 int auton()
 {
-   Brain.Screen.printAt(90, 90, "in auton");
-   //Brain.Screen.clearScreen();
+    // clawControl();
+    chainMotor.setStopping(hold);
 
-   
+    int rotationValue = rotationSensor.position(degrees);
+
+    Brain.Screen.printAt(60, 30, "%d", rotationValue);
+
+    if (rotationValue < 290)
+    {
+        //chainMotor.spin(forward); // down is forward
+    }
+    else
+    {
+        chainMotor.stop();
+    }
+
+
+    int distanceFromBall = ballDistanceSensor.value(); //in mm
+    Brain.Screen.printAt(60, 70, "%d",distanceFromBall);
+
+    int distanceFromWall = wallDistanceSensor.value(); //in mm
+    Brain.Screen.printAt(60, 110, "%d",distanceFromWall);
+
+
+
+    wait(10, msec);
+    Brain.Screen.clearScreen();
+    // Brain.Screen.printAt(90, 90, "in auton");
+    // Brain.Screen.clearScreen();
 
     return 0;
 }
