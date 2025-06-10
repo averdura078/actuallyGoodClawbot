@@ -24,6 +24,7 @@ int main()
 {
     // Initializing Robot Configuration. DO NOT REMOVE!
     vexcodeInit();
+    Drivetrain.setStopping(brake);
     rotationSensor.resetPosition();
     inertialSensor.calibrate();
     while (inertialSensor.isCalibrating())
@@ -37,6 +38,8 @@ int main()
         {
            // Brain.Screen.printAt(1, 90, "pressed");
             auton();
+            Brain.Screen.clearScreen();
+            Brain.Screen.print("done auton");
         }
         else // op control
         {
@@ -73,12 +76,34 @@ int auton()
     int distanceFromWall = wallDistanceSensor.value(); // in mm
     //Brain.Screen.printAt(60, 110, "%d", distanceFromWall);
 
-    int heading = inertialSensor.heading();
-    Brain.Screen.printAt(60, 150, "%d", heading);
 
 
-    Drivetrain.setTurnVelocity(5, percent);
-    Drivetrain.turnToHeading(90, degrees);
+    //inertialSensor.resetHeading();
+
+    //Brain.Screen.printAt(60, 150, "%d", inertialSensor.heading());
+    Brain.Screen.clearScreen();
+    Brain.Screen.setCursor(1, 1);
+    Brain.Screen.print(inertialSensor.heading(degrees));
+
+    wait(1, seconds);
+
+    Drivetrain.setTurnVelocity(0.5, percent);
+    while(inertialSensor.heading(degrees) <=90)
+    {
+        Drivetrain.turn(left);
+        Brain.Screen.clearScreen();
+        Brain.Screen.setCursor(1, 10);
+        Brain.Screen.print(inertialSensor.heading(degrees));
+        //wait(0.5, seconds);
+    }
+    Drivetrain.stop();
+
+
+//      while (inertialSensor.heading(degrees) <= 90.0) 
+// { 
+// Drivetrain.turnToHeading(90, degrees);
+// } 
+// Drivetrain.stop();
 
 
 
