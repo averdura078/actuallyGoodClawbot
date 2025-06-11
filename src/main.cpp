@@ -58,9 +58,7 @@ int auton()
     chainMotor.setStopping(hold);
 
     int rotationValue = rotationSensor.position(degrees);
-
    // Brain.Screen.printAt(60, 30, "%d", rotationValue);
-
     if (rotationValue < 290)
     {
         // chainMotor.spin(forward); // down is forward
@@ -78,40 +76,59 @@ int auton()
 
 
 
+
     //inertialSensor.resetHeading();
+   
+   //P CONTROLLER
+float actualHeading = inertialSensor.heading(degrees);
+float targetHeading = 90;
+float error = targetHeading - actualHeading;
+float motorSpeed = 0.05*abs(error); //when error is big: motors fast, when error is small, motors slow
 
-    //Brain.Screen.printAt(60, 150, "%d", inertialSensor.heading());
-    Brain.Screen.clearScreen();
-    Brain.Screen.setCursor(1, 1);
-    Brain.Screen.print(inertialSensor.heading(degrees));
+while (error > targetHeading)
+{
+    LeftDriveSmart.spin(forward, motorSpeed, pct);
+    RightDriveSmart.spin(reverse, motorSpeed, pct);
+}
+while (error < targetHeading)
+{
+    LeftDriveSmart.spin(reverse, motorSpeed, pct);
+    RightDriveSmart.spin(forward, motorSpeed, pct);
+}
 
-    wait(1, seconds);
 
-    Drivetrain.setTurnVelocity(0.5, percent);
-    while(inertialSensor.heading(degrees) <=90)
-    {
-        Drivetrain.turn(left);
-        Brain.Screen.clearScreen();
-        Brain.Screen.setCursor(1, 10);
-        Brain.Screen.print(inertialSensor.heading(degrees));
-        //wait(0.5, seconds);
-    }
+    // Drivetrain.setTurnVelocity(2, percent);
+    // while(inertialSensor.heading(degrees) < 90)
+    // {
+    //     Drivetrain.turn(left);
+    //     Brain.Screen.clearScreen();
+    //     Brain.Screen.setCursor(1, 10);
+    //     Brain.Screen.print(inertialSensor.heading(degrees));
+    // }
+    // while (inertialSensor.heading(degrees) > 90)
+    // {
+    //     Drivetrain.turn(right);
+    // }
     Drivetrain.stop();
 
 
-//      while (inertialSensor.heading(degrees) <= 90.0) 
-// { 
-// Drivetrain.turnToHeading(90, degrees);
-// } 
-// Drivetrain.stop();
 
 
+    Brain.Screen.setCursor(1, 1);
+    Brain.Screen.print(inertialSensor.heading(degrees));
 
+    Brain.Screen.setCursor(3,1);
+    Brain.Screen.print(actualHeading);
+
+    Brain.Screen.setCursor(5,1);
+    Brain.Screen.print(error);
+
+    Brain.Screen.setCursor(7,1);
+    Brain.Screen.print(motorSpeed);
 
     wait(10, msec);
     Brain.Screen.clearScreen();
     // Brain.Screen.printAt(90, 90, "in auton");
-    // Brain.Screen.clearScreen();
 
     return 0;
 }
