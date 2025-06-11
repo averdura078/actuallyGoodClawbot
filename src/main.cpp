@@ -12,6 +12,7 @@
 #include "robotconfig.h"
 #include <stdio.h>
 #include <math.h>
+#include <cmath>
 using namespace vex;
 
 int tankDrive();
@@ -36,7 +37,7 @@ int main()
     {
         if (Controller1.ButtonX.pressing()) // run auton
         {
-           // Brain.Screen.printAt(1, 90, "pressed");
+            // Brain.Screen.printAt(1, 90, "pressed");
             auton();
             Brain.Screen.clearScreen();
             Brain.Screen.print("done auton");
@@ -58,7 +59,7 @@ int auton()
     chainMotor.setStopping(hold);
 
     int rotationValue = rotationSensor.position(degrees);
-   // Brain.Screen.printAt(60, 30, "%d", rotationValue);
+    // Brain.Screen.printAt(60, 30, "%d", rotationValue);
     if (rotationValue < 290)
     {
         // chainMotor.spin(forward); // down is forward
@@ -69,33 +70,67 @@ int auton()
     }
 
     int distanceFromBall = ballDistanceSensor.value(); // in mm
-    //Brain.Screen.printAt(60, 70, "%d", distanceFromBall);
+    // Brain.Screen.printAt(60, 70, "%d", distanceFromBall);
 
     int distanceFromWall = wallDistanceSensor.value(); // in mm
-    //Brain.Screen.printAt(60, 110, "%d", distanceFromWall);
+    // Brain.Screen.printAt(60, 110, "%d", distanceFromWall);
 
 
 
+    // inertialSensor.resetHeading();
 
-    //inertialSensor.resetHeading();
-   
-   //P CONTROLLER
-float actualHeading = inertialSensor.heading(degrees);
-float targetHeading = 90;
-float error = targetHeading - actualHeading;
-float motorSpeed = 0.05*abs(error); //when error is big: motors fast, when error is small, motors slow
+    // P CONTROLLER
+    float targetHeading = 90;
 
-while (error > targetHeading)
-{
-    LeftDriveSmart.spin(forward, motorSpeed, pct);
-    RightDriveSmart.spin(reverse, motorSpeed, pct);
-}
-while (error < targetHeading)
-{
-    LeftDriveSmart.spin(reverse, motorSpeed, pct);
-    RightDriveSmart.spin(forward, motorSpeed, pct);
-}
+    float actualHeading = inertialSensor.heading(degrees);
+    float error = targetHeading - actualHeading;
+    float motorSpeed = 0.05 * error; // when error is big: motors fast, when error is small, motors slow
 
+    while (fabs(error) > 1)
+    {
+        actualHeading = inertialSensor.heading(degrees); // update current heading
+
+        error = targetHeading - actualHeading; // update error, then make it always be between -180 and +180
+        if (error > 180)
+        {
+            error -= 360;
+        }
+        if (error < -180)
+        {
+            error += 360;
+        }
+
+        motorSpeed = 0.05 * error; // update speed
+
+        // prevent motor burnout
+        if (motorSpeed > 90)
+        {
+            motorSpeed = 90;
+        }
+        if (motorSpeed < -90)
+        {
+            motorSpeed = -90;
+        }
+
+        LeftDriveSmart.spin(forward, motorSpeed, pct);  // motorSpeed positive = spin fwd, motorSpeed negative = spin rev
+        RightDriveSmart.spin(reverse, motorSpeed, pct); // motorSpeed negative = spin fwd, motorSpeed positive = spin rev
+
+        // print all info. order: actual heading, error, motor speed
+        Brain.Screen.setCursor(1, 1);
+        Brain.Screen.print(inertialSensor.heading(degrees));
+
+        Brain.Screen.setCursor(3, 1);
+        Brain.Screen.print(error);
+
+        Brain.Screen.setCursor(5, 1);
+        Brain.Screen.print(motorSpeed);
+
+        //wait(5, msec);
+        //Brain.Screen.clearScreen();
+    }
+
+    LeftDriveSmart.stop();
+    RightDriveSmart.stop();
 
     // Drivetrain.setTurnVelocity(2, percent);
     // while(inertialSensor.heading(degrees) < 90)
@@ -109,21 +144,15 @@ while (error < targetHeading)
     // {
     //     Drivetrain.turn(right);
     // }
-    Drivetrain.stop();
-
-
-
+    // Drivetrain.stop();
 
     Brain.Screen.setCursor(1, 1);
     Brain.Screen.print(inertialSensor.heading(degrees));
 
-    Brain.Screen.setCursor(3,1);
-    Brain.Screen.print(actualHeading);
-
-    Brain.Screen.setCursor(5,1);
+    Brain.Screen.setCursor(3, 1);
     Brain.Screen.print(error);
 
-    Brain.Screen.setCursor(7,1);
+    Brain.Screen.setCursor(5, 1);
     Brain.Screen.print(motorSpeed);
 
     wait(10, msec);
