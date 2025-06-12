@@ -55,6 +55,15 @@ int main()
 
 int auton()
 {
+    Brain.Timer.reset(); // resets timer to 0 immediately before timer starts counting to 30 seconds
+
+    while (Brain.Timer.value() <= 30.0)
+    {
+        // auto code
+        // make sure the movements do NOT take longer than 30 seconds
+    }
+    // stop all motors
+
     // clawControl();
     chainMotor.setStopping(hold);
 
@@ -75,8 +84,6 @@ int auton()
     int distanceFromWall = wallDistanceSensor.value(); // in mm
     // Brain.Screen.printAt(60, 110, "%d", distanceFromWall);
 
-
-
     // inertialSensor.resetHeading();
 
     // P CONTROLLER
@@ -84,13 +91,14 @@ int auton()
 
     float actualHeading = inertialSensor.heading(degrees);
     float error = targetHeading - actualHeading;
-    float motorSpeed = 0.05 * error; // when error is big: motors fast, when error is small, motors slow
+    float motorSpeed = 0.03 * error; // when error is big: motors fast, when error is small, motors slow
 
-    while (fabs(error) > 1)
+    while ((fabs(error) > 5) && (fabs(error)<5))
     {
         actualHeading = inertialSensor.heading(degrees); // update current heading
 
         error = targetHeading - actualHeading; // update error, then make it always be between -180 and +180
+
         if (error > 180)
         {
             error -= 360;
@@ -100,7 +108,7 @@ int auton()
             error += 360;
         }
 
-        motorSpeed = 0.05 * error; // update speed
+        motorSpeed = 0.03 * error; // update speed
 
         // prevent motor burnout
         if (motorSpeed > 90)
@@ -126,8 +134,11 @@ int auton()
         Brain.Screen.print(motorSpeed);
 
         //wait(5, msec);
-        //Brain.Screen.clearScreen();
+        // Brain.Screen.clearScreen();
     }
+
+    Brain.Screen.setCursor(7, 1);
+    Brain.Screen.print("OUT OF LOOP!");
 
     LeftDriveSmart.stop();
     RightDriveSmart.stop();
