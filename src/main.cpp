@@ -57,12 +57,12 @@ int auton()
 {
     Brain.Timer.reset(); // resets timer to 0 immediately before timer starts counting to 30 seconds
 
-    while (Brain.Timer.value() <= 30.0)
-    {
-        // auto code
-        // make sure the movements do NOT take longer than 30 seconds
-    }
-    // stop all motors
+    // while (Brain.Timer.value() <= 30.0)
+    // {
+    //     // auto code
+    //     // make sure the movements do NOT take longer than 30 seconds
+    // }
+    // // stop all motors
 
     // clawControl();
     chainMotor.setStopping(hold);
@@ -87,17 +87,32 @@ int auton()
     // inertialSensor.resetHeading();
 
     // P CONTROLLER
-    float targetHeading = 90;
+    float targetHeading = 270;
 
     float actualHeading = inertialSensor.heading(degrees);
     float error = targetHeading - actualHeading;
-    float motorSpeed = 0.03 * error; // when error is big: motors fast, when error is small, motors slow
+    int x = 0;
 
-    while ((fabs(error) > 5) && (fabs(error)<5))
+    if (error>=0)
     {
+        x = 5;
+    }
+    else if (error<=0)
+    {
+        x = -5;
+    }
+    float motorSpeed = (0.1 * error) - x; // when error is big: motors fast, when error is small, motors slow
+
+    while ((error > 2) || (error<-2))
+    {
+
+        if (fabs(error)<1)
+        {
+            break;
+        }
         actualHeading = inertialSensor.heading(degrees); // update current heading
 
-        error = targetHeading - actualHeading; // update error, then make it always be between -180 and +180
+        error = actualHeading - targetHeading; // update error, then make it always be between -180 and +180
 
         if (error > 180)
         {
@@ -108,7 +123,7 @@ int auton()
             error += 360;
         }
 
-        motorSpeed = 0.03 * error; // update speed
+        motorSpeed = (0.1 * error) - x; // update speed
 
         // prevent motor burnout
         if (motorSpeed > 90)
@@ -133,7 +148,7 @@ int auton()
         Brain.Screen.setCursor(5, 1);
         Brain.Screen.print(motorSpeed);
 
-        //wait(5, msec);
+        wait(5, msec);
         // Brain.Screen.clearScreen();
     }
 
@@ -166,7 +181,7 @@ int auton()
     Brain.Screen.setCursor(5, 1);
     Brain.Screen.print(motorSpeed);
 
-    wait(10, msec);
+    //wait(10, msec);
     Brain.Screen.clearScreen();
     // Brain.Screen.printAt(90, 90, "in auton");
 
