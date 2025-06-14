@@ -233,11 +233,11 @@ int clawClose()
     return 0;
 }
 
-int turn(float heading)
-{
+// int turn(float heading)
+// {
 
-    //return motorSpeed;
-}
+//     //return motorSpeed;
+// }
 
 
 int clawControl()
