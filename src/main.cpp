@@ -21,6 +21,11 @@ int splitArcadeBasic();
 int clawControl();
 int auton();
 
+int chainUp();
+int chainDown();
+int clawClose();
+int clawOpen();
+
 int main()
 {
     // Initializing Robot Configuration. DO NOT REMOVE!
@@ -45,9 +50,11 @@ int main()
         }
         if (Controller1.ButtonA.pressing() == true) // run op control (for 1.5min)
         {
+            Brain.Timer.reset();
+
             // tankDrive();
-            // splitArcadeWithFunction();
             splitArcadeBasic();
+            // splitArcadeWithFunction();
 
             clawControl();
         }
@@ -56,21 +63,38 @@ int main()
 
 int auton()
 {
-    // while (Brain.Timer.value() <= 30.0)
-    // {
-    //     // auto code
-    //     // make sure the movements do NOT take longer than 30 seconds
-    // }
-    // // stop all motors
+    /*
+    PSEUDOCODE:
+
+    - get preload over
+
+    - drive to corner 1
+    - pick up football 1
+    - drive to wall and put over
+
+    - drive to corner 2
+    - pick up football 2
+    - drive to wall and put over
+
+    MAKE SURE IT DOESN'T TAKE MORE THAN 30s!!!
+
+    FUNCTIONS:
+    - chain go up
+    - chain go down
+
+    - claw close
+    - claw open
+
+    - turn with P controller
+    */
 
     Brain.Timer.reset(); // resets timer to 0 immediately before timer starts counting to 30 seconds
 
-    chainMotor.setStopping(hold);
+    chainMotor.setStopping(hold); 
 
     while (Brain.Timer.value() <= 30.0) //do auton
     {
         int rotationValue = rotationSensor.position(degrees);
-        // Brain.Screen.printAt(60, 30, "%d", rotationValue);
         if (rotationValue < 290)
         {
             // chainMotor.spin(forward); // down is forward
@@ -184,6 +208,37 @@ int auton()
 
     return 0;
 }
+
+int chainUp()
+{
+
+    return 0;
+}
+
+int chainDown()
+{
+
+    return 0;
+}
+
+int clawOpen()
+{
+
+    return 0;
+}
+
+int clawClose()
+{
+
+    return 0;
+}
+
+int turn(float heading)
+{
+
+    //return motorSpeed;
+}
+
 
 int clawControl()
 {
