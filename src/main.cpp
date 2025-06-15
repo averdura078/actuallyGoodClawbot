@@ -25,6 +25,7 @@ int chainUp();
 int chainDown();
 int clawClose();
 int clawOpen();
+int turn(float targetHeading);
 
 int main()
 {
@@ -90,10 +91,18 @@ int auton()
 
     Brain.Timer.reset(); // resets timer to 0 immediately before timer starts counting to 30 seconds
 
-    chainMotor.setStopping(hold); 
+    chainMotor.setStopping(hold);
+    clawMotor.setStopping(hold);
 
-    while (Brain.Timer.value() <= 30.0) //do auton
+    while (Brain.Timer.value() <= 30.0) // do autonomous routine
     {
+        chainUp();
+        chainDown();
+        clawClose();
+        clawOpen();
+
+        Drivetrain.driveFor(forward, 12, inches, false); // starts driving
+
         int rotationValue = rotationSensor.position(degrees);
         if (rotationValue < 290)
         {
@@ -110,92 +119,19 @@ int auton()
         int distanceFromWall = wallDistanceSensor.value(); // in mm
         // Brain.Screen.printAt(60, 110, "%d", distanceFromWall);
 
-
-        
-        // inertialSensor.resetHeading();
         // P CONTROLLER
-        float targetHeading = 270;
+        // inertialSensor.resetHeading();
+        turn(90);
 
-        float actualHeading = inertialSensor.heading(degrees);
-        float error = targetHeading - actualHeading;
-        int x = 0;
-
-        if (error >= 0)
-        {
-            x = 5;
-        }
-        else if (error <= 0)
-        {
-            x = -5;
-        }
-        float motorSpeed = (0.1 * error) - x; // when error is big: motors fast, when error is small, motors slow
-
-        while ((error > 2) || (error < -2))
-        {
-
-            if (fabs(error) < 1)
-            {
-                break;
-            }
-            actualHeading = inertialSensor.heading(degrees); // update current heading
-
-            error = actualHeading - targetHeading; // update error, then make it always be between -180 and +180
-
-            if (error > 180)
-            {
-                error -= 360;
-            }
-            if (error < -180)
-            {
-                error += 360;
-            }
-
-            motorSpeed = (0.1 * error) - x; // update speed
-
-            // prevent motor burnout
-            if (motorSpeed > 90)
-            {
-                motorSpeed = 90;
-            }
-            if (motorSpeed < -90)
-            {
-                motorSpeed = -90;
-            }
-
-            LeftDriveSmart.spin(forward, motorSpeed, pct);  // motorSpeed positive = spin fwd, motorSpeed negative = spin rev
-            RightDriveSmart.spin(reverse, motorSpeed, pct); // motorSpeed negative = spin fwd, motorSpeed positive = spin rev
-
-            // print all info. order: actual heading, error, motor speed
-            Brain.Screen.setCursor(1, 1);
-            Brain.Screen.print(inertialSensor.heading(degrees));
-
-            Brain.Screen.setCursor(3, 1);
-            Brain.Screen.print(error);
-
-            Brain.Screen.setCursor(5, 1);
-            Brain.Screen.print(motorSpeed);
-
-            wait(5, msec);
-            // Brain.Screen.clearScreen();
-        }
-
-        Brain.Screen.setCursor(7, 1);
-        Brain.Screen.print("OUT OF LOOP!");
-
-        LeftDriveSmart.stop();
-        RightDriveSmart.stop();
-
-
-
-
+        // print stuff
         Brain.Screen.setCursor(1, 1);
         Brain.Screen.print(inertialSensor.heading(degrees));
 
         Brain.Screen.setCursor(3, 1);
-        Brain.Screen.print(error);
+        // Brain.Screen.print(error);
 
         Brain.Screen.setCursor(5, 1);
-        Brain.Screen.print(motorSpeed);
+        // Brain.Screen.print(motorSpeed);
 
         Brain.Screen.clearScreen();
     }
@@ -233,12 +169,79 @@ int clawClose()
     return 0;
 }
 
-// int turn(float heading)
-// {
+int turn(float targetHeading)
+{
+    float actualHeading = inertialSensor.heading(degrees);
+    float error = targetHeading - actualHeading;
+    int x = 0;
 
-//     //return motorSpeed;
-// }
+    if (error >= 0)
+    {
+        x = 5;
+    }
+    else if (error <= 0)
+    {
+        x = -5;
+    }
+    float motorSpeed = (0.1 * error) - x; // when error is big: motors fast, when error is small, motors slow
 
+    while ((error > 2) || (error < -2))
+    {
+
+        if (fabs(error) < 1)
+        {
+            break;
+        }
+        actualHeading = inertialSensor.heading(degrees); // update current heading
+
+        error = actualHeading - targetHeading; // update error, then make it always be between -180 and +180
+
+        if (error > 180)
+        {
+            error -= 360;
+        }
+        if (error < -180)
+        {
+            error += 360;
+        }
+
+        motorSpeed = (0.1 * error) - x; // update speed
+
+        // prevent motor burnout
+        if (motorSpeed > 90)
+        {
+            motorSpeed = 90;
+        }
+        if (motorSpeed < -90)
+        {
+            motorSpeed = -90;
+        }
+
+        LeftDriveSmart.spin(forward, motorSpeed, pct);  // motorSpeed positive = spin fwd, motorSpeed negative = spin rev
+        RightDriveSmart.spin(reverse, motorSpeed, pct); // motorSpeed negative = spin fwd, motorSpeed positive = spin rev
+
+        // print all info. order: actual heading, error, motor speed
+        Brain.Screen.setCursor(1, 1);
+        Brain.Screen.print(inertialSensor.heading(degrees));
+
+        Brain.Screen.setCursor(3, 1);
+        Brain.Screen.print(error);
+
+        Brain.Screen.setCursor(5, 1);
+        Brain.Screen.print(motorSpeed);
+
+        wait(5, msec); // remove?
+        // Brain.Screen.clearScreen();
+    }
+
+    Brain.Screen.setCursor(7, 1);
+    Brain.Screen.print("OUT OF LOOP!");
+
+    LeftDriveSmart.stop();
+    RightDriveSmart.stop();
+
+    return 0;
+}
 
 int clawControl()
 {
@@ -386,18 +389,17 @@ int tankDrive()
     return 0;
 }
 
-//old code chunks
-
-        // Drivetrain.setTurnVelocity(2, percent);
-        // while(inertialSensor.heading(degrees) < 90)
-        // {
-        //     Drivetrain.turn(left);
-        //     Brain.Screen.clearScreen();
-        //     Brain.Screen.setCursor(1, 10);
-        //     Brain.Screen.print(inertialSensor.heading(degrees));
-        // }
-        // while (inertialSensor.heading(degrees) > 90)
-        // {
-        //     Drivetrain.turn(right);
-        // }
-        // Drivetrain.stop();
+// old code chunks
+// Drivetrain.setTurnVelocity(2, percent);
+// while(inertialSensor.heading(degrees) < 90)
+// {
+//     Drivetrain.turn(left);
+//     Brain.Screen.clearScreen();
+//     Brain.Screen.setCursor(1, 10);
+//     Brain.Screen.print(inertialSensor.heading(degrees));
+// }
+// while (inertialSensor.heading(degrees) > 90)
+// {
+//     Drivetrain.turn(right);
+// }
+// Drivetrain.stop();
