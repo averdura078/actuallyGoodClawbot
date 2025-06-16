@@ -26,6 +26,7 @@ int chainDown();
 int clawClose();
 int clawOpen();
 int turn(float targetHeading);
+int search();
 
 int main()
 {
@@ -96,12 +97,14 @@ int auton()
 
     while (Brain.Timer.value() <= 30.0) // do autonomous routine
     {
-        chainUp();
-        chainDown();
-        clawClose();
-        clawOpen();
+        // chainUp();
+        // chainDown();
+        // clawClose();
+        // clawOpen();
 
-        Drivetrain.driveFor(forward, 12, inches, false); // starts driving
+        search();
+
+        // Drivetrain.driveFor(reverse, 120, mm, false); // starts driving
 
         int rotationValue = rotationSensor.position(degrees);
         if (rotationValue < 290)
@@ -121,7 +124,7 @@ int auton()
 
         // P CONTROLLER
         // inertialSensor.resetHeading();
-        turn(90);
+        // turn(180);
 
         // print stuff
         Brain.Screen.setCursor(1, 1);
@@ -169,6 +172,50 @@ int clawClose()
     return 0;
 }
 
+int search()
+{
+    int topVal = wallDistanceSensor.value();
+    int bottVal = ballDistanceSensor.value();
+
+    int buffer = 10;
+
+    while (abs(topVal - bottVal) >= buffer)
+    {
+        topVal = wallDistanceSensor.value();
+        bottVal = ballDistanceSensor.value();
+        // rotate
+        LeftDriveSmart.spin(reverse, 2, pct);
+        RightDriveSmart.spin(forward, 2, pct);
+    }
+
+    while (topVal == 9999 || bottVal == 9999)
+    {
+        LeftDriveSmart.spin(reverse, 4, pct);
+        RightDriveSmart.spin(reverse, 4, pct);
+
+        topVal = wallDistanceSensor.value();
+        bottVal = ballDistanceSensor.value();
+    }
+
+    while (ballDistanceSensor.value() >= 120)
+    {
+        LeftDriveSmart.spin(reverse, 4, pct);
+        RightDriveSmart.spin(reverse, 4, pct);
+    }
+
+    LeftDriveSmart.stop();
+    RightDriveSmart.stop();
+
+    Brain.Screen.setCursor(1, 1);
+    Brain.Screen.print("here");
+
+    wait(10, msec);
+
+    Brain.Screen.clearScreen();
+
+    return 0;
+}
+
 int turn(float targetHeading)
 {
     float actualHeading = inertialSensor.heading(degrees);
@@ -177,18 +224,18 @@ int turn(float targetHeading)
 
     if (error >= 0)
     {
-        x = 5;
+        x = 0;
     }
     else if (error <= 0)
     {
-        x = -5;
+        x = 0;
     }
-    float motorSpeed = (0.1 * error) - x; // when error is big: motors fast, when error is small, motors slow
+    float motorSpeed = (0.15 * error) - x; // when error is big: motors fast, when error is small, motors slow
 
     while ((error > 2) || (error < -2))
     {
 
-        if (fabs(error) < 1)
+        if (fabs(error) < 5)
         {
             break;
         }
@@ -205,7 +252,7 @@ int turn(float targetHeading)
             error += 360;
         }
 
-        motorSpeed = (0.1 * error) - x; // update speed
+        motorSpeed = (0.15 * error) - x; // update speed
 
         // prevent motor burnout
         if (motorSpeed > 90)
