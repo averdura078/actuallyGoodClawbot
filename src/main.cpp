@@ -55,11 +55,14 @@ int main()
         {
             Brain.Timer.reset();
 
-            // tankDrive();
-            splitArcadeBasic();
-            // splitArcadeWithFunction();
+            while (Brain.Timer.value() <= 90.0)
+            {
+                // tankDrive();
+                splitArcadeBasic();
+                // splitArcadeWithFunction();
 
-            clawControl();
+                clawControl();
+            }
         }
     }
 }
@@ -89,6 +92,9 @@ int auton()
     - claw open
 
     - turn with P controller
+
+    - search
+    - path
     */
 
     Brain.Timer.reset(); // resets timer to 0 immediately before timer starts counting to 30 seconds
@@ -98,24 +104,15 @@ int auton()
 
     while (Brain.Timer.value() <= 30.0) // do autonomous routine
     {
+        //ALL AUTONOMOUS FUNCTIONS:
         // chainUp();
         // chainDown();
         // clawClose();
         // clawOpen();
+        // search();
+        // path();
 
-        search();
-
-        // Drivetrain.driveFor(reverse, 120, mm, false); // starts driving
-
-        int rotationValue = rotationSensor.position(degrees);
-        if (rotationValue < 290)
-        {
-            // chainMotor.spin(forward); // down is forward
-        }
-        else
-        {
-            chainMotor.stop();
-        }
+        int rotationValue = rotationSensor.position(degrees); //chain
 
         int distanceFromBall = ballDistanceSensor.value(); // in mm
         // Brain.Screen.printAt(60, 70, "%d", distanceFromBall);
@@ -130,13 +127,12 @@ int auton()
         // print stuff
         Brain.Screen.setCursor(1, 1);
         Brain.Screen.print(inertialSensor.heading(degrees));
-
         Brain.Screen.setCursor(3, 1);
-        // Brain.Screen.print(error);
-
+        Brain.Screen.print(rotationValue);
         Brain.Screen.setCursor(5, 1);
-        // Brain.Screen.print(motorSpeed);
-
+        Brain.Screen.print(distanceFromBall);
+        Brain.Screen.setCursor(7, 1);
+        Brain.Screen.print(distanceFromWall);
         Brain.Screen.clearScreen();
     }
 
@@ -149,45 +145,48 @@ int auton()
     return 0;
 }
 
-int chainUp() {
-    while (rotationSensor.value() > 0) {
+int chainUp()
+{
+    while (rotationSensor.value() > 0)
+    {
         chainMotor.spin(reverse, 50, percent);
     }
-    chainMotor.stop(); // Optional: stop motor after reaching target
+    chainMotor.stop(); // optional: stop motor after reaching target
     return 0;
 }
 
-
-// Function to lower the chain until the rotation sensor reads 1 or more
-int chainDown() {
-    while (rotationSensor.value() < 1) {
+// lower the chain until the rotation sensor reads 1 or more
+int chainDown()
+{
+    while (rotationSensor.value() < 1)
+    {
 
         chainMotor.spin(forward, 50, percent);
-
     }
-    chainMotor.stop(); // Optional: stop motor after reaching target
+    chainMotor.stop(); // optional: stop motor after reaching target
     return 0;
 }
 
-// Function to open the claw continuously
-int clawOpen() {
+// open the claw continuously
+int clawOpen()
+{
     clawMotor.setTimeout(2, seconds);
     clawMotor.spin(forward, 50, percent);
-    // Wait until motor stops spinning (timeout reached or stopped)
-    clawMotor.waitUntilDone();
-    clawMotor.
-    clawMotor.stop();  // Ensure motor is stopped
+    // wait until motor stops spinning (timeout reached or stopped)
+    // clawMotor.waitUntilDone();
+    clawMotor.stop(); // ensure motor is stopped
 
     return 0;
 }
 
 // Function to close the claw continuously
-int clawClose() {
+int clawClose()
+{
     clawMotor.setTimeout(2, seconds);
-    clawMotor.spin(reverse, 50, percent); // Assuming closing is reverse
-    // Wait until motor stops spinning (timeout reached or stopped)
-    clawMotor.waitUntilDone();
-    clawMotor.stop();  // Ensure motor is stopped
+    clawMotor.spin(reverse, 50, percent); // assuming closing is reverse?
+    // wait until motor stops spinning (timeout reached or stopped)
+    // clawMotor.waitUntilDone();
+    clawMotor.stop(); // ensure motor is stopped
 
     return 0;
 }
@@ -226,11 +225,11 @@ int search()
 
         Brain.Screen.setCursor(1, 1);
         Brain.Screen.print(topVal);
-        Brain.Screen.setCursor(1, 2);
+        Brain.Screen.setCursor(2, 1);
         Brain.Screen.print(bottVal);
         wait(10, msec);
 
-        Brain.Screen.setCursor(1, 3);
+        Brain.Screen.setCursor(3, 1);
         Brain.Screen.print("distance is different, going toward ball");
     }
 
@@ -244,34 +243,34 @@ int search()
 
         Brain.Screen.setCursor(1, 1);
         Brain.Screen.print(topVal);
-        Brain.Screen.setCursor(1, 2);
+        Brain.Screen.setCursor(2, 1);
         Brain.Screen.print(bottVal);
         wait(10, msec);
 
-        Brain.Screen.setCursor(1, 3);
+        Brain.Screen.setCursor(3, 1);
         Brain.Screen.print("distance is same, spinning to find ball");
     }
 
-    // while (ballDistanceSensor.value() <= 1000) // 1000 cm
-    // {
-    //     LeftDriveSmart.spin(reverse, 4, pct); // forward
-    //     RightDriveSmart.spin(reverse, 4, pct);
+    while ((ballDistanceSensor.value() <= 1000) && (wallDistanceSensor.value() <= 1000)) // go forward if too far away
+    {
+        LeftDriveSmart.spin(reverse, 4, pct); // forward
+        RightDriveSmart.spin(reverse, 4, pct);
 
-    //     Brain.Screen.setCursor(1, 1);
-    //     Brain.Screen.print(ballDistanceSensor.value());
-    //     Brain.Screen.setCursor(1, 3);
-    //     Brain.Screen.print("going toward ball");
-    // }
+        Brain.Screen.setCursor(1, 1);
+        Brain.Screen.print(ballDistanceSensor.value());
+        Brain.Screen.setCursor(2, 1);
+        Brain.Screen.print("looking for anything");
+    }
 
     LeftDriveSmart.stop();
     RightDriveSmart.stop();
 
     Brain.Screen.setCursor(1, 1);
     Brain.Screen.print(topVal);
-    Brain.Screen.setCursor(1, 2);
+    Brain.Screen.setCursor(2, 1);
     Brain.Screen.print(bottVal);
 
-    Brain.Screen.setCursor(1, 3);
+    Brain.Screen.setCursor(3, 1);
     Brain.Screen.print("not in a while loop");
 
     wait(10, msec);
@@ -445,34 +444,30 @@ int clawControl()
     clawMotor.setMaxTorque(35, percent); // don't burn out motor
     clawMotor.setTimeout(2, seconds);
 
-    while (Brain.Timer.value() <= 90.0)
+    if (Controller1.ButtonL1.pressing())
     {
+        chainMotor.spin(reverse, 50, percent); // move up at 50% speed
+    }
+    else if (Controller1.ButtonL2.pressing())
+    {
+        chainMotor.spin(forward, 50, percent); // move down at 50% speed
+    }
+    else
+    {
+        chainMotor.stop(); // stop the motor if the button is not pressed
+    }
 
-        if (Controller1.ButtonL1.pressing())
-        {
-            chainMotor.spin(reverse, 50, percent); // move up at 50% speed
-        }
-        else if (Controller1.ButtonL2.pressing())
-        {
-            chainMotor.spin(forward, 50, percent); // move down at 50% speed
-        }
-        else
-        {
-            chainMotor.stop(); // stop the motor if the button is not pressed
-        }
-
-        if (Controller1.ButtonR2.pressing())
-        {
-            clawMotor.spin(reverse, 50, percent);
-        }
-        else if (Controller1.ButtonR1.pressing())
-        {
-            clawMotor.spin(forward, 50, percent);
-        }
-        else
-        {
-            clawMotor.stop();
-        }
+    if (Controller1.ButtonR2.pressing())
+    {
+        clawMotor.spin(reverse, 50, percent);
+    }
+    else if (Controller1.ButtonR1.pressing())
+    {
+        clawMotor.spin(forward, 50, percent);
+    }
+    else
+    {
+        clawMotor.stop();
     }
 
     clawMotor.stop();
@@ -515,30 +510,27 @@ int splitArcadeBasic()
     int rightValue;
     int leftValue;
 
-    while (Brain.Timer.value() <= 90.0)
-    {
-        turnSpeed = (Controller1.Axis1.position()) / 1.5;
-        velocity = Controller1.Axis3.position();
+    turnSpeed = (Controller1.Axis1.position()) / 1.5;
+    velocity = Controller1.Axis3.position();
 
-        Brain.Screen.printAt(1, 30, "%d", velocity);
-        Brain.Screen.printAt(1, 50, "%d", turnSpeed);
-        wait(25, msec);
-        Brain.Screen.clearScreen();
+    Brain.Screen.printAt(1, 30, "%d", velocity);
+    Brain.Screen.printAt(1, 50, "%d", turnSpeed);
+    wait(25, msec);
+    Brain.Screen.clearScreen();
 
-        rightValue = (velocity - turnSpeed) / 1.5;
-        leftValue = (velocity + turnSpeed) / 1.5;
+    rightValue = (velocity - turnSpeed) / 1.5;
+    leftValue = (velocity + turnSpeed) / 1.5;
 
-        Brain.Screen.printAt(1, 90, "%d", rightValue);
-        Brain.Screen.printAt(1, 110, "%d", leftValue);
-        wait(25, msec);
-        Brain.Screen.clearScreen();
+    Brain.Screen.printAt(1, 90, "%d", rightValue);
+    Brain.Screen.printAt(1, 110, "%d", leftValue);
+    wait(25, msec);
+    Brain.Screen.clearScreen();
 
-        LeftDriveSmart.setVelocity(leftValue, percent);
-        RightDriveSmart.setVelocity(rightValue, percent);
+    LeftDriveSmart.setVelocity(leftValue, percent);
+    RightDriveSmart.setVelocity(rightValue, percent);
 
-        LeftDriveSmart.spin(reverse);
-        RightDriveSmart.spin(reverse);
-    }
+    LeftDriveSmart.spin(reverse);
+    RightDriveSmart.spin(reverse);
 
     return 0;
 }
@@ -597,3 +589,12 @@ int tankDrive()
 //     Drivetrain.turn(right);
 // }
 // Drivetrain.stop();
+////// Drivetrain.driveFor(reverse, 120, mm, false); // starts driving
+//////if (rotationValue < 290)
+// {
+//     // chainMotor.spin(forward); // down is forward
+// }
+// else
+// {
+//     chainMotor.stop();
+// }
