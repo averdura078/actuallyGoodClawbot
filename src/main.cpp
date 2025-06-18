@@ -104,15 +104,25 @@ int auton()
 
     while (Brain.Timer.value() <= 30.0) // do autonomous routine
     {
-        //ALL AUTONOMOUS FUNCTIONS:
+        Drivetrain.setDriveVelocity(5, percent);
+        Drivetrain.driveFor(200, mm, true);
+        turn(180);
+        Drivetrain.driveFor(200, mm, true);
+
+        clawOpen(); // drop off preload
+        clawClose();
+
+        turn(0);
+
+        // ALL AUTONOMOUS FUNCTIONS:
         // chainUp();
         // chainDown();
         // clawClose();
         // clawOpen();
-        // search();
+        search();
         // path();
 
-        int rotationValue = rotationSensor.position(degrees); //chain
+        int rotationValue = rotationSensor.position(degrees); // chain
 
         int distanceFromBall = ballDistanceSensor.value(); // in mm
         // Brain.Screen.printAt(60, 70, "%d", distanceFromBall);
@@ -147,34 +157,48 @@ int auton()
 
 int chainUp()
 {
-    while (rotationSensor.value() > 0)
-    {
-        chainMotor.spin(reverse, 50, percent);
-    }
-    chainMotor.stop(); // optional: stop motor after reaching target
+    // while (rotationSensor.value() <1)
+    // {
+    //     chainMotor.spin(reverse, 50, percent);
+    // }
+    // chainMotor.stop(); // optional: stop motor after reaching target
+    // return 0;
+
+    chainMotor.setReversed(true);
+    chainMotor.spinFor(2200, msec);
+    Brain.Screen.print("going up");
+
     return 0;
 }
 
 // lower the chain until the rotation sensor reads 1 or more
 int chainDown()
 {
-    while (rotationSensor.value() < 1)
-    {
+    // while (rotationSensor.value() >0)
+    // {
 
-        chainMotor.spin(forward, 50, percent);
-    }
-    chainMotor.stop(); // optional: stop motor after reaching target
+    //     chainMotor.spin(forward, 50, percent);
+    // }
+    // chainMotor.stop(); // optional: stop motor after reaching target
+    // return 0;
+
+    chainMotor.setReversed(false);
+    chainMotor.spinFor(2200, msec);
+    Brain.Screen.print("going type MAYDAY");
+
     return 0;
 }
 
 // open the claw continuously
 int clawOpen()
 {
-    clawMotor.setTimeout(2, seconds);
-    clawMotor.spin(forward, 50, percent);
-    // wait until motor stops spinning (timeout reached or stopped)
-    // clawMotor.waitUntilDone();
-    clawMotor.stop(); // ensure motor is stopped
+    // clawMotor.setTimeout(2, seconds);
+    // clawMotor.spin(reverse, 50, percent);
+    clawMotor.setReversed(true);
+    clawMotor.spinFor(2000, msec);
+    Brain.Screen.print("opening");
+
+    // clawMotor.stop(); // ensure motor is stopped
 
     return 0;
 }
@@ -182,11 +206,13 @@ int clawOpen()
 // Function to close the claw continuously
 int clawClose()
 {
-    clawMotor.setTimeout(2, seconds);
-    clawMotor.spin(reverse, 50, percent); // assuming closing is reverse?
-    // wait until motor stops spinning (timeout reached or stopped)
-    // clawMotor.waitUntilDone();
-    clawMotor.stop(); // ensure motor is stopped
+    // clawMotor.setTimeout(2, seconds);
+    // clawMotor.spin(forward, 50, percent);
+    clawMotor.setReversed(false);
+    clawMotor.spinFor(2000, msec);
+    Brain.Screen.print("closing");
+
+    // clawMotor.stop(); // ensure motor is stopped
 
     return 0;
 }
@@ -215,6 +241,19 @@ int search()
     //     wait(10, msec);
     // }
 
+    while ((ballDistanceSensor.value() >= 1000) || (wallDistanceSensor.value() >= 1000)) // go forward if too far away
+    {
+        LeftDriveSmart.spin(reverse, 4, pct); // forward
+        RightDriveSmart.spin(reverse, 4, pct);
+
+        Brain.Screen.setCursor(1, 1);
+        Brain.Screen.print(ballDistanceSensor.value());
+        Brain.Screen.setCursor(2, 1);
+        Brain.Screen.print("looking for anything");
+        wait(10, msec);
+        Brain.Screen.clearScreen();
+    }
+
     while (abs(topVal - bottVal) >= buffer) // while different go forward
     {
         topVal = wallDistanceSensor.value(); // update
@@ -227,10 +266,35 @@ int search()
         Brain.Screen.print(topVal);
         Brain.Screen.setCursor(2, 1);
         Brain.Screen.print(bottVal);
-        wait(10, msec);
 
         Brain.Screen.setCursor(3, 1);
         Brain.Screen.print("distance is different, going toward ball");
+
+        wait(10, msec);
+        Brain.Screen.clearScreen();
+
+        if (ballDistanceSensor.value() <= 120)
+        {
+            clawOpen();
+            chainDown();
+            clawClose();
+            chainUp();
+
+            turn(180);
+
+            while (wallDistanceSensor.value() >= 30)
+            {
+                LeftDriveSmart.spin(reverse, 5, percent);
+                RightDriveSmart.spin(reverse, 5, percent);
+            }
+            LeftDriveSmart.stop();
+            RightDriveSmart.stop();
+
+            clawOpen();
+            clawClose();
+
+            turn(0);
+        }
     }
 
     while (abs(topVal - bottVal) <= buffer) // distances are the same so spin
@@ -245,21 +309,12 @@ int search()
         Brain.Screen.print(topVal);
         Brain.Screen.setCursor(2, 1);
         Brain.Screen.print(bottVal);
-        wait(10, msec);
 
         Brain.Screen.setCursor(3, 1);
         Brain.Screen.print("distance is same, spinning to find ball");
-    }
 
-    while ((ballDistanceSensor.value() <= 1000) && (wallDistanceSensor.value() <= 1000)) // go forward if too far away
-    {
-        LeftDriveSmart.spin(reverse, 4, pct); // forward
-        RightDriveSmart.spin(reverse, 4, pct);
-
-        Brain.Screen.setCursor(1, 1);
-        Brain.Screen.print(ballDistanceSensor.value());
-        Brain.Screen.setCursor(2, 1);
-        Brain.Screen.print("looking for anything");
+        wait(10, msec);
+        Brain.Screen.clearScreen();
     }
 
     LeftDriveSmart.stop();
@@ -355,9 +410,12 @@ int turn(float targetHeading)
 
 int path()
 {
+    Drivetrain.setDriveVelocity(5, percent);
+    Drivetrain.driveFor(200, mm, true);
     turn(180);
+    Drivetrain.driveFor(200, mm, true);
 
-    clawMotor.spin(reverse); // drop off preload
+    clawClose(); // drop off preload
 
     turn(0);
 
