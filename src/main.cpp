@@ -102,17 +102,23 @@ int auton()
     chainMotor.setStopping(hold);
     clawMotor.setStopping(hold);
 
+    bool start = false;
+
     while (Brain.Timer.value() <= 30.0) // do autonomous routine
     {
-        Drivetrain.setDriveVelocity(5, percent);
-        Drivetrain.driveFor(200, mm, true);
+        if (start == false)
+        {
+        Drivetrain.setDriveVelocity(4, percent);
+        Drivetrain.driveFor(-50, mm, true);
         turn(180);
-        Drivetrain.driveFor(200, mm, true);
+        Drivetrain.driveFor(-50, mm, true);
 
         clawOpen(); // drop off preload
         clawClose();
 
         turn(0);
+        start = true;
+        }
 
         // ALL AUTONOMOUS FUNCTIONS:
         // chainUp();
@@ -241,7 +247,7 @@ int search()
     //     wait(10, msec);
     // }
 
-    while ((ballDistanceSensor.value() >= 1000) || (wallDistanceSensor.value() >= 1000)) // go forward if too far away
+    while ((ballDistanceSensor.value() >= 1000) || (wallDistanceSensor.value() >= 1000) && Brain.Timer.value()<=30.0) // go forward if too far away
     {
         LeftDriveSmart.spin(reverse, 4, pct); // forward
         RightDriveSmart.spin(reverse, 4, pct);
@@ -254,7 +260,7 @@ int search()
         Brain.Screen.clearScreen();
     }
 
-    while (abs(topVal - bottVal) >= buffer) // while different go forward
+    while (abs(topVal - bottVal) >= buffer && Brain.Timer.value()<=30.0) // while different go forward
     {
         topVal = wallDistanceSensor.value(); // update
         bottVal = ballDistanceSensor.value();
@@ -273,8 +279,10 @@ int search()
         wait(10, msec);
         Brain.Screen.clearScreen();
 
-        if (ballDistanceSensor.value() <= 120)
+        if (ballDistanceSensor.value() <= 130)
         {
+            LeftDriveSmart.stop();
+            RightDriveSmart.stop();
             clawOpen();
             chainDown();
             clawClose();
@@ -282,7 +290,7 @@ int search()
 
             turn(180);
 
-            while (wallDistanceSensor.value() >= 30)
+            while (wallDistanceSensor.value() >= 30 && Brain.Timer.value()<=30.0)
             {
                 LeftDriveSmart.spin(reverse, 5, percent);
                 RightDriveSmart.spin(reverse, 5, percent);
@@ -297,7 +305,7 @@ int search()
         }
     }
 
-    while (abs(topVal - bottVal) <= buffer) // distances are the same so spin
+    while (abs(topVal - bottVal) <= buffer && Brain.Timer.value()<=30.0) // distances are the same so spin
     {
         topVal = wallDistanceSensor.value(); // update
         bottVal = ballDistanceSensor.value();
